@@ -5,7 +5,7 @@ from src.deep_hash_embeddings import DHERepresentation
 
 
 class TestDHERepresentation(unittest.TestCase):
-    def test_user_id_lookup_rep(self):
+    def test_dhe_rep(self):
         num_tasks = 3
         user_id_embedding_dim = 50
         user_features_size = 10
