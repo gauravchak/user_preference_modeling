@@ -32,28 +32,38 @@ class DHEEstimator(MultiTaskEstimator):
             cross_features_size,
             user_value_weights,
         )
+        # In DHE paper this was more than DU
+        # In Twitter, GNN they found something similar to work where
+        # the final layer was about one third of the start input dim.
+        self.dhe_stack_in: int = user_id_embedding_dim
         self.dhe_stack = nn.Sequential(
-            nn.Linear(item_id_embedding_dim, item_id_embedding_dim),
+            nn.Linear(self.dhe_stack_in, user_id_embedding_dim),
             nn.ReLU(),
-            nn.Linear(item_id_embedding_dim, item_id_embedding_dim),
+            nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
             nn.ReLU(),
-            nn.Linear(item_id_embedding_dim, item_id_embedding_dim),
+            nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
             nn.ReLU(),
-            nn.Linear(item_id_embedding_dim, item_id_embedding_dim)
+            nn.Linear(user_id_embedding_dim, user_id_embedding_dim)
         )
 
     def hash_fn(
         self,
         user_id: torch.Tensor,  # [B]
     ) -> torch.Tensor:
-        """WIP, Need to replace with a proper hash function"""
-        return torch.randn(user_id.shape[0], self.item_id_embedding_dim)
+        """
+        Returns [B, self.dhe_stack_in]
+        WIP, Need to replace with a proper hash function
+        """
+        return torch.randn(user_id.shape[0], self.dhe_stack_in)  # [B, D_dhe_in]
 
     def get_user_embedding(
         self, 
         user_id: torch.Tensor,  # [B]
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:
-        user_hash = self.hash_fn(user_id)  # [B, D]
-        user_id_embeddings = self.dhe_stack(user_hash)
+        """
+        Returns: [B, user_id_embedding_dim]
+        """
+        user_hash = self.hash_fn(user_id)  # [B, D_dhe_in]
+        user_id_embeddings = self.dhe_stack(user_hash)  # [B, DU]
         return user_id_embeddings

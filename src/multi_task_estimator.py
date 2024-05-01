@@ -40,13 +40,14 @@ class MultiTaskEstimator(nn.Module):
         """
         super(MultiTaskEstimator, self).__init__()
         self.user_value_weights = torch.tensor(user_value_weights)  # noqa TODO add device input.
+        self.user_id_embedding_dim = user_id_embedding_dim
+        self.item_id_embedding_dim = item_id_embedding_dim
 
         # Embedding layers for user and item ids
         self.user_id_embedding_arch = nn.Embedding(
             user_id_hash_size, user_id_embedding_dim)
         self.item_id_embedding_arch = nn.Embedding(
             item_id_hash_size, item_id_embedding_dim)
-        self.item_id_embedding_dim = item_id_embedding_dim
 
         # Linear projection layer for user features
         self.user_features_layer = nn.Linear(
