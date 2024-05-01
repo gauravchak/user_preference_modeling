@@ -46,6 +46,7 @@ class MultiTaskEstimator(nn.Module):
             user_id_hash_size, user_id_embedding_dim)
         self.item_id_embedding_arch = nn.Embedding(
             item_id_hash_size, item_id_embedding_dim)
+        self.item_id_embedding_dim = item_id_embedding_dim
 
         # Linear projection layer for user features
         self.user_features_layer = nn.Linear(
@@ -69,6 +70,14 @@ class MultiTaskEstimator(nn.Module):
                          2 * item_id_embedding_dim +
                          self.cross_feature_proc_dim),
             out_features=num_tasks)
+    
+    def get_user_embedding(
+        self,
+        user_id: torch.Tensor,  # [B]
+        user_features: torch.Tensor,  # [B, IU]
+    ) -> torch.Tensor:
+        user_id_embedding = self.user_id_embedding_arch(user_id)
+        return user_id_embedding
 
     def process_features(
         self,
@@ -85,8 +94,12 @@ class MultiTaskEstimator(nn.Module):
         feature processing.
         """
 
-        # Embedding lookup for user and item ids
-        user_id_embedding = self.user_id_embedding_arch(user_id)
+        # Get user embedding
+        user_id_embedding = self.get_user_embedding(
+            user_id=user_id,
+            user_features=user_features,
+        )
+        # Embedding lookup for item ids
         item_id_embedding = self.item_id_embedding_arch(item_id)
 
         # Linear transformation for user features
