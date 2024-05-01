@@ -55,7 +55,7 @@ class UserMORepresentations(UserCohortRepresentation):
             user_id_hash_size, user_id_embedding_dim)
         # Setup Mixture network
         self.mixture_layer = nn.Sequential(
-            nn.Linear(user_features_size, user_features_size),
+            nn.Linear(user_features_size, 2),
             nn.ReLU()
         )
 
