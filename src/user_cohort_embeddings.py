@@ -3,10 +3,10 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from multi_task_estimator import MultiTaskEstimator
+from src.multi_task_estimator import MultiTaskEstimator
 
 
-class UserCohortEstimator(MultiTaskEstimator):
+class UserCohortRepresentation(MultiTaskEstimator):
     """
     Here to capture user preference, we infer the cluster/cohort this
     user is closest to based on user features and use the embeddings
@@ -16,7 +16,6 @@ class UserCohortEstimator(MultiTaskEstimator):
     def __init__(
         self,
         num_tasks: int,
-        user_id_hash_size: int,
         user_id_embedding_dim: int,
         user_features_size: int,
         item_id_hash_size: int,
@@ -25,19 +24,18 @@ class UserCohortEstimator(MultiTaskEstimator):
         cross_features_size: int,
         user_value_weights: List[float],
         cohort_table_size: int,
-        cohort_lookup_dropout_rate: float=0.5,
-        cohort_enable_topk_regularization: bool=False,
+        cohort_lookup_dropout_rate: float,
+        cohort_enable_topk_regularization: bool,
     ) -> None:
-        super(UserCohortEstimator, self).__init__(
-            num_tasks,
-            user_id_hash_size,
-            user_id_embedding_dim,
-            user_features_size,
-            item_id_hash_size,
-            item_id_embedding_dim,
-            item_features_size,
-            cross_features_size,
-            user_value_weights,
+        super(UserCohortRepresentation, self).__init__(
+            num_tasks=num_tasks,
+            user_id_embedding_dim=user_id_embedding_dim,
+            user_features_size=user_features_size,
+            item_id_hash_size=item_id_hash_size,
+            item_id_embedding_dim=item_id_embedding_dim,
+            item_features_size=item_features_size,
+            cross_features_size=cross_features_size,
+            user_value_weights=user_value_weights,
         )
         self.dhe_stack_in: int = user_id_embedding_dim
         self.dhe_stack = nn.Sequential(
