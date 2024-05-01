@@ -15,7 +15,6 @@ class MultiTaskEstimator(nn.Module):
     def __init__(
         self,
         num_tasks: int,
-        user_id_hash_size: int,
         user_id_embedding_dim: int,
         user_features_size: int,
         item_id_hash_size: int,
@@ -27,7 +26,6 @@ class MultiTaskEstimator(nn.Module):
         """
         params:
             num_tasks (T): The tasks to compute estimates of
-            user_id_hash_size: the size of the embedding table for users
             user_id_embedding_dim (DU): internal dimension
             user_features_size (IU): input feature size for users
             item_id_hash_size: the size of the embedding table for items
@@ -43,9 +41,7 @@ class MultiTaskEstimator(nn.Module):
         self.user_id_embedding_dim = user_id_embedding_dim
         self.item_id_embedding_dim = item_id_embedding_dim
 
-        # Embedding layers for user and item ids
-        self.user_id_embedding_arch = nn.Embedding(
-            user_id_hash_size, user_id_embedding_dim)
+        # Embedding layers for item ids
         self.item_id_embedding_arch = nn.Embedding(
             item_id_hash_size, item_id_embedding_dim)
 
@@ -77,8 +73,8 @@ class MultiTaskEstimator(nn.Module):
         user_id: torch.Tensor,  # [B]
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:
-        user_id_embedding = self.user_id_embedding_arch(user_id)
-        return user_id_embedding
+        """Please implement in subclass"""
+        pass
 
     def process_features(
         self,
