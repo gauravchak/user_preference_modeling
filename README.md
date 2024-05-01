@@ -22,6 +22,6 @@ The implementation in our repository is:
 ### Customization
 If you want to allocate more of your memorization capacity to a certain cohort, for instance you could care more about US users, you could do that by encoding the weight in the loss function and perhaps adding the country / feature in the input to the Mixture of Representations tower.
 
-## Testing
+## Contributing
 
-Run `pytest tests/*` from main directory.
+Run `pytest tests/*` from main directory before submitting a PR.
