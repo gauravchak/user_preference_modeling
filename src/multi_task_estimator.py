@@ -9,9 +9,10 @@ import torch.nn.functional as F
 
 
 class MultiTaskEstimator(nn.Module):
-    """A core component of multi-task ranking systems where 
+    """A core component of multi-task ranking systems where
     we compute estimates of the getting those binary feedback
     labels from the user."""
+
     def __init__(
         self,
         num_tasks: int,
@@ -37,37 +38,43 @@ class MultiTaskEstimator(nn.Module):
             of long term user satisfaction.
         """
         super(MultiTaskEstimator, self).__init__()
-        self.user_value_weights = torch.tensor(user_value_weights)  # noqa TODO add device input.
+        self.user_value_weights = torch.tensor(
+            user_value_weights
+        )  # noqa TODO add device input.
         self.user_id_embedding_dim = user_id_embedding_dim
         self.item_id_embedding_dim = item_id_embedding_dim
 
         # Embedding layers for item ids
         self.item_id_embedding_arch = nn.Embedding(
-            item_id_hash_size, item_id_embedding_dim)
+            item_id_hash_size, item_id_embedding_dim
+        )
 
         # Linear projection layer for user features
         self.user_features_layer = nn.Linear(
-            in_features=user_features_size, 
-            out_features=user_id_embedding_dim)  # noqa
+            in_features=user_features_size, out_features=user_id_embedding_dim
+        )  # noqa
 
         # Linear projection layer for user features
         self.item_features_layer = nn.Linear(
-            in_features=item_features_size, 
-            out_features=item_id_embedding_dim)  # noqa
+            in_features=item_features_size, out_features=item_id_embedding_dim
+        )  # noqa
 
         self.cross_feature_proc_dim = 128
         # Linear projection layer for cross features
         self.cross_features_layer = nn.Linear(
-            in_features=cross_features_size,
-            out_features=self.cross_feature_proc_dim)
+            in_features=cross_features_size, out_features=self.cross_feature_proc_dim
+        )
 
         # Linear layer for final prediction
         self.task_arch = nn.Linear(
-            in_features=(2 * user_id_embedding_dim +
-                         2 * item_id_embedding_dim +
-                         self.cross_feature_proc_dim),
-            out_features=num_tasks)
-    
+            in_features=(
+                2 * user_id_embedding_dim
+                + 2 * item_id_embedding_dim
+                + self.cross_feature_proc_dim
+            ),
+            out_features=num_tasks,
+        )
+
     def get_user_embedding(
         self,
         user_id: torch.Tensor,  # [B]
@@ -86,8 +93,8 @@ class MultiTaskEstimator(nn.Module):
         position: torch.Tensor,  # [B]
     ) -> torch.Tensor:
         """
-        Process features. Separated from forward function so that we can change 
-        handling of forward and train_forward in future without duplicating 
+        Process features. Separated from forward function so that we can change
+        handling of forward and train_forward in future without duplicating
         feature processing.
         """
 
@@ -112,12 +119,12 @@ class MultiTaskEstimator(nn.Module):
         combined_features = torch.cat(
             [
                 user_id_embedding,
-                user_features_transformed, 
+                user_features_transformed,
                 item_id_embedding,
                 item_features_transformed,
-                cross_features_transformed
+                cross_features_transformed,
             ],
-            dim=1
+            dim=1,
         )
 
         return combined_features
@@ -152,22 +159,22 @@ class MultiTaskEstimator(nn.Module):
         item_features,  # [B, II]
         cross_features,  # [B, IC]
         position,  # [B]
-        labels
+        labels,
     ) -> torch.Tensor:
         """Compute the loss during training"""
         # Get task logits using forward method
         ui_logits = self.forward(
-            user_id=user_id, 
-            user_features=user_features, 
-            item_id=item_id, 
-            item_features=item_features, 
+            user_id=user_id,
+            user_features=user_features,
+            item_id=item_id,
+            item_features=item_features,
             cross_features=cross_features,
             position=position,
         )
 
         # Compute binary cross-entropy loss
         cross_entropy_loss = F.binary_cross_entropy_with_logits(
-            input=ui_logits, target=labels.float(), reduction='sum'
+            input=ui_logits, target=labels.float(), reduction="sum"
         )
 
         return cross_entropy_loss

@@ -48,7 +48,8 @@ class UseridLookupRepresentation(MultiTaskEstimator):
             user_value_weights=user_value_weights,
         )
         self.user_id_embedding_arch = nn.Embedding(
-            user_id_hash_size, user_id_embedding_dim)
+            user_id_hash_size, user_id_embedding_dim
+        )
 
     def get_user_embedding(
         self,
@@ -57,4 +58,3 @@ class UseridLookupRepresentation(MultiTaskEstimator):
     ) -> torch.Tensor:
         user_id_embedding = self.user_id_embedding_arch(user_id)
         return user_id_embedding
-

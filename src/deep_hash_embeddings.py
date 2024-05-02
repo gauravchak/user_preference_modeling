@@ -7,7 +7,7 @@ from src.multi_task_estimator import MultiTaskEstimator
 
 
 class DHERepresentation(MultiTaskEstimator):
-    """ Same as MultiTaskEstimator except using Deep hash Embeddings idea """
+    """Same as MultiTaskEstimator except using Deep hash Embeddings idea"""
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class DHERepresentation(MultiTaskEstimator):
             nn.ReLU(),
             nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
             nn.ReLU(),
-            nn.Linear(user_id_embedding_dim, user_id_embedding_dim)
+            nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
         )
 
     def hash_fn(
@@ -70,7 +70,7 @@ class DHERepresentation(MultiTaskEstimator):
         return torch.randn(user_id.shape[0], self.dhe_stack_in)  # [B, D_dhe_in]
 
     def get_user_embedding(
-        self, 
+        self,
         user_id: torch.Tensor,  # [B]
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:

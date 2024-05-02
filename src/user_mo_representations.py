@@ -10,7 +10,7 @@ from src.user_cohort_embeddings import UserCohortRepresentation
 class UserMORepresentations(UserCohortRepresentation):
     """
     This is the kicthen soup idea that has proliferated in ML recently.
-    Here we use both 
+    Here we use both
     - the table lookup approach of how user id embeddings
     are implemented in UseridLookupRepresentation.
     - the cohort/cluster embeddings of UserCohortRepresentation
@@ -52,11 +52,16 @@ class UserMORepresentations(UserCohortRepresentation):
         )
         # Setup id lookup
         self.user_id_embedding_arch = nn.Embedding(
-            user_id_hash_size, user_id_embedding_dim)
+            user_id_hash_size, user_id_embedding_dim
+        )
         # Setup Mixture network
         self.mixture_layer = nn.Sequential(
             nn.Linear(user_features_size, 2),
-            nn.ReLU()
+            # Add a dropout ensuring that sometimes the
+            # network passes gradient to the other branch and hence
+            # learns to train both representations for a user.
+            nn.Dropout(p=0.8),
+            nn.ReLU(),
         )
 
     def get_user_embedding(
@@ -64,21 +69,18 @@ class UserMORepresentations(UserCohortRepresentation):
         user_id: torch.Tensor,  # [B]
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:
-        user_id_lookup_embedding = self.user_id_embedding_arch(
-            user_id
-        )  # [B, DU]
+        user_id_lookup_embedding = self.user_id_embedding_arch(user_id)  # [B, DU]
         user_id_cohort_embedding = super().get_user_embedding(
-            user_id=user_id,
-            user_features=user_features
+            user_id=user_id, user_features=user_features
         )  # [B, DU]
-        rep_wts = self.mixture_layer(user_features)
+        rep_wts = self.mixture_layer(user_features)  # [B, 2]
         rep_probs = F.softmax(rep_wts, dim=1)  # [B, 2]
         stacked_user_embeddings = torch.stack(
-            [user_id_lookup_embedding, user_id_cohort_embedding], 
-            dim=2
+            [user_id_lookup_embedding, user_id_cohort_embedding], dim=2
         )  # [B, DU, 2]
         user_id_embedding = torch.bmm(
             stacked_user_embeddings, rep_probs.unsqueeze(2)
-        ).squeeze(-1)  # [B, DU]
+        ).squeeze(
+            -1
+        )  # [B, DU]
         return user_id_embedding
-

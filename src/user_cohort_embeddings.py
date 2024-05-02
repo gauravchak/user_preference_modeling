@@ -46,27 +46,23 @@ class UserCohortRepresentation(MultiTaskEstimator):
             nn.ReLU(),
             nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
             nn.ReLU(),
-            nn.Linear(user_id_embedding_dim, user_id_embedding_dim)
+            nn.Linear(user_id_embedding_dim, user_id_embedding_dim),
         )
         # Initialize the cohort embedding matrix with random values
         self.cohort_embedding_matrix = nn.Parameter(
             torch.randn(cohort_table_size, self.dhe_stack_in)
         )  # [cohort_table_size, self.dhe_stack_in]
-        self.cohort_enable_topk_regularization: bool = (
-            cohort_enable_topk_regularization
-        )
-        self.topk:int = 1
+        self.cohort_enable_topk_regularization: bool = cohort_enable_topk_regularization
+        self.topk: int = 1
         # Get cohort addressing from user features.
         # Input: [B, user features]
         # Output: [B, cohort_table_size]
         self.cohort_addressing_layer = nn.Sequential(
-            nn.Linear(
-                in_features=user_features_size,
-                out_features=cohort_table_size),
+            nn.Linear(in_features=user_features_size, out_features=cohort_table_size),
             # Adding dropout could increase generalization
             # by allowing multiple clusters in the table to learn
             # from the behavior of a user.
-            nn.Dropout(p=cohort_lookup_dropout_rate)
+            nn.Dropout(p=cohort_lookup_dropout_rate),
         )
 
     def compute_cohort_affinity(
@@ -86,10 +82,7 @@ class UserCohortRepresentation(MultiTaskEstimator):
             # Set the selected indices to 1/self.topk
             # Note that if you have topk > 1 then this ensures that
             # the sum of values in dim=1 is still 1
-            cohort_affinity.scatter_(
-                dim=1, index=topk_indices,
-                value=(1/self.topk)
-            )
+            cohort_affinity.scatter_(dim=1, index=topk_indices, value=(1 / self.topk))
         else:
             cohort_affinity = F.softmax(input=cohort_affinity, dim=-1)
         return cohort_affinity
