@@ -107,5 +107,5 @@ class UserCohortRepresentation(MultiTaskEstimator):
         cohort_embedding_in = torch.matmul(
             cohort_affinity, self.cohort_embedding_matrix
         )  # [B, H] * [H, dhe_in] -> [B, dhe_in]
-        user_id_embeddings = self.dhe_stack(cohort_embedding_in)  # [B, DU]
-        return user_id_embeddings
+        user_representation = self.dhe_stack(cohort_embedding_in)  # [B, DU]
+        return user_representation
