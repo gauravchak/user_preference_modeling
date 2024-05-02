@@ -10,7 +10,7 @@ We will also look at the schematic of an implementation using Deep Hash Embeddin
 ![Fig 2: deep_hash_embeddings](./images/deep_hash_embeddings.png)
 
 Then we will look at an approach where we reuse the machinery of Deep Hash Embeddings but seed it with an embedding that is looked up in a relatively small table as a function of the user's features (not including user id)
-![Fig 3: user_feature_based_lookup](./images/user_feature_based_lookup.png)
+![Fig 3: user_feature_based_lookup](./images/user_feature_based_lookup_2.png)
 
 Finally we will put id lookup and cohort lookup together using and idea from [this paper from Google](https://arxiv.org/abs/2210.14309). This image from the paper captures the idea:
 ![Fig 4: Memorization vs Generalization](./images/memorization_vs_generalization.png)
