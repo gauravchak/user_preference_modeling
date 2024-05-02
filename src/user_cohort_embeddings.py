@@ -2,6 +2,7 @@ from typing import List
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from src.multi_task_estimator import MultiTaskEstimator
 
@@ -68,17 +69,12 @@ class UserCohortRepresentation(MultiTaskEstimator):
             nn.Dropout(p=cohort_lookup_dropout_rate)
         )
 
-    def get_user_embedding(
+    def compute_cohort_affinity(
         self,
-        user_id: torch.Tensor,  # [B]
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:
-        """
-        Returns: [B, user_id_embedding_dim]
-        """
         # Pass user features through the cohort addressing layer
         cohort_affinity = self.cohort_addressing_layer(user_features)  # [B, H]
-
         if self.cohort_enable_topk_regularization:
             # Apply top-k=1 to get the indices of the top k values
             # This ensures that the sum along dim 1 will finally be 1
@@ -94,7 +90,19 @@ class UserCohortRepresentation(MultiTaskEstimator):
                 dim=1, index=topk_indices,
                 value=(1/self.topk)
             )
+        else:
+            cohort_affinity = F.softmax(input=cohort_affinity, dim=-1)
+        return cohort_affinity
 
+    def get_user_embedding(
+        self,
+        user_id: torch.Tensor,  # [B]
+        user_features: torch.Tensor,  # [B, IU]
+    ) -> torch.Tensor:
+        """
+        Returns: [B, user_id_embedding_dim]
+        """
+        cohort_affinity = self.compute_cohort_affinity(user_features)
         # Perform matrix multiplication with the embedding matrix
         cohort_embedding_in = torch.matmul(
             cohort_affinity, self.cohort_embedding_matrix

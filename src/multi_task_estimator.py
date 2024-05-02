@@ -153,7 +153,7 @@ class MultiTaskEstimator(nn.Module):
         cross_features,  # [B, IC]
         position,  # [B]
         labels
-    ) -> float:
+    ) -> torch.Tensor:
         """Compute the loss during training"""
         # Get task logits using forward method
         ui_logits = self.forward(
