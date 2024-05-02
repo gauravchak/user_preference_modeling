@@ -74,7 +74,7 @@ class MultiTaskEstimator(nn.Module):
         user_features: torch.Tensor,  # [B, IU]
     ) -> torch.Tensor:
         """Please implement in subclass"""
-        pass
+        raise NotImplementedError("Subclasses must implement get_user_embedding method")
 
     def process_features(
         self,
